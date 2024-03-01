@@ -13,6 +13,15 @@ An example of the JSON Output from  looks like this:
 ```
 This URL is fetched every 60 seconds, which can be configured in config.yml
 
+## Configuration File (config.yml)
+```
+# Time in seconds to wait between each fetch
+fetch-interval: 60
+
+# URL to fetch UUIDs from
+uuid-fetch-url: "https://api.namemc.com/server/play.earthpol.com/likes"
+```
+
 ## How to use the API
 Simple add the plugin.jar as a depedency to your plugin
 
@@ -35,3 +44,5 @@ Now you can check against the List as many times as you want without getting rat
 
 ## Disclaimer
 This plugin is not associated, sponsored or supported by NameMC, please do not bother them with support or questions about this plugin. This plugin is maintained by EarthPol who has no affiliation to NameMC or any of NameMC services.
+
+Official NameMc Website: [https://namemc.com/](https://namemc.com/)
