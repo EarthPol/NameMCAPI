@@ -34,26 +34,28 @@ public final class NameMC extends JavaPlugin implements UUIDFetcherAPI {
     }
 
     private void fetchUUIDs() {
+        List<UUID> fetchedUuids = new ArrayList<>();
         try {
             URL url = new URL(fetchUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            List<UUID> fetchedUuids;
             try (InputStreamReader reader = new InputStreamReader(con.getInputStream())) {
                 // Use Gson to parse the JSON array into a List<UUID>
                 Type listType = new TypeToken<List<String>>(){}.getType();
                 List<String> uuidStrings = new Gson().fromJson(reader, listType);
-                fetchedUuids = new ArrayList<>();
                 for (String uuidString : uuidStrings) {
                     fetchedUuids.add(UUID.fromString(uuidString));
                 }
+                // Only clear and update the uuidList if fetching was successful
+                uuidList.clear();
+                uuidList.addAll(fetchedUuids);
             }
-            // Clear and add all fetched UUIDs to the uuidList
-            uuidList.clear();
-            uuidList.addAll(fetchedUuids);
         } catch (Exception e) {
+            // Log the error but do not clear the uuidList
             e.printStackTrace();
+            // Optionally, log a more specific message indicating the fetch was skipped due to an error
+            getLogger().warning("Failed to fetch UUIDs. Will attempt again on the next scheduled trigger.");
         }
     }
 
