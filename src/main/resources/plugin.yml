@@ -1,0 +1,5 @@
+name: NameMC
+version: '${project.version}'
+main: com.earthpol.namemc.NameMC
+api-version: '1.20'
+authors: ["0xBit"]

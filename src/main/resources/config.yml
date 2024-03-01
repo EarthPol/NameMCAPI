@@ -1,0 +1,5 @@
+# Time in seconds to wait between each fetch
+fetch-interval: 60
+
+# URL to fetch UUIDs from
+uuid-fetch-url: "https://api.namemc.com/server/play.earthpol.com/likes"
