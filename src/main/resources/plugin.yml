@@ -1,5 +1,6 @@
-name: NameMC
+name: NameMCAPI
 version: '${project.version}'
-main: com.earthpol.namemc.NameMC
+main: com.earthpol.namemc.NameMCAPI
 api-version: '1.20'
+folia-supported: true
 authors: ["0xBit"]

@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
-public final class NameMC extends JavaPlugin implements UUIDFetcherAPI {
+public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
     private List<UUID> uuidList = new CopyOnWriteArrayList<>();
     private String fetchUrl;
     @Override
