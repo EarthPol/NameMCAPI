@@ -15,8 +15,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private List<UUID> uuidList = new CopyOnWriteArrayList<>();
     private String fetchUrl;
     @Override
@@ -27,8 +32,8 @@ public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
         int interval = config.getInt("fetch-interval", 60) * 20; // Convert to ticks
         fetchUrl = config.getString("uuid-fetch-url", "");
 
-        BukkitScheduler scheduler = Bukkit.getScheduler();
-        scheduler.runTaskTimerAsynchronously(this, this::fetchUUIDs, 0L, interval);
+        // Start fetching UUIDs asynchronously
+        scheduler.scheduleAtFixedRate(this::fetchUUIDs, 0, interval, TimeUnit.SECONDS);
 
         Bukkit.getServicesManager().register(UUIDFetcherAPI.class, this, this, org.bukkit.plugin.ServicePriority.Normal);
     }
@@ -66,6 +71,13 @@ public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+        }
     }
 }
