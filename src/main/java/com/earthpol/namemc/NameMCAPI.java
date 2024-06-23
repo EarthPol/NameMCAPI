@@ -4,7 +4,6 @@ import com.earthpol.namemc.api.UUIDFetcherAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,16 +23,22 @@ public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private List<UUID> uuidList = new CopyOnWriteArrayList<>();
     private String fetchUrl;
+    private long lastFetchTime = 0;
+    private int fetchIntervalSeconds;
+
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
         FileConfiguration config = this.getConfig();
 
-        int interval = config.getInt("fetch-interval", 60) * 20; // Convert to ticks
+        fetchIntervalSeconds = config.getInt("fetch-interval", 60); // Fetch interval in seconds
         fetchUrl = config.getString("uuid-fetch-url", "");
 
         // Start fetching UUIDs asynchronously
-        scheduler.scheduleAtFixedRate(this::fetchUUIDs, 0, interval, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::fetchUUIDs, 0, fetchIntervalSeconds, TimeUnit.SECONDS);
+
+        // Start the monitoring task
+        scheduler.scheduleAtFixedRate(this::monitorFetch, fetchIntervalSeconds, fetchIntervalSeconds, TimeUnit.SECONDS);
 
         Bukkit.getServicesManager().register(UUIDFetcherAPI.class, this, this, org.bukkit.plugin.ServicePriority.Normal);
     }
@@ -55,12 +60,20 @@ public final class NameMCAPI extends JavaPlugin implements UUIDFetcherAPI {
                 // Only clear and update the uuidList if fetching was successful
                 uuidList.clear();
                 uuidList.addAll(fetchedUuids);
+                lastFetchTime = System.currentTimeMillis(); // Update last fetch time
             }
         } catch (Exception e) {
             // Log the error but do not clear the uuidList
             e.printStackTrace();
             // Optionally, log a more specific message indicating the fetch was skipped due to an error
             getLogger().warning("Failed to fetch UUIDs. Will attempt again on the next scheduled trigger.");
+        }
+    }
+
+    private void monitorFetch() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastFetchTime > fetchIntervalSeconds * 2000) { // Allowing some buffer time
+            getLogger().warning("Fetch task may not be running as expected. Last fetch was more than twice the interval ago.");
         }
     }
 
